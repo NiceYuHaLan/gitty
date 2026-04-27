@@ -1,0 +1,28 @@
+# Secrets
+.env
+*.env
+!*.env.example
+
+# Build
+build/
+.gradle/
+.gradle.kts
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database (H2)
+data/
+
+# Uploads
+uploads/
+
+# Logs
+*.log
+logs/
