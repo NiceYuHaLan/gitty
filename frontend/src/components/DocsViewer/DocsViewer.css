@@ -1,0 +1,83 @@
+.docs-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 60vh;
+}
+
+.docs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2a4a;
+}
+
+.docs-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.docs-repo-link {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.docs-repo-link:hover {
+  text-decoration: underline;
+}
+
+.docs-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #0f0f23;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #2a2a4a;
+  margin-bottom: 16px;
+}
+
+.docs-text {
+  white-space: pre-wrap;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  margin: 0;
+}
+
+.docs-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-copy,
+.btn-close-docs {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-copy {
+  background: #2a2a4a;
+  color: white;
+}
+
+.btn-copy:hover {
+  background: #3a3a5a;
+}
+
+.btn-close-docs {
+  background: #6366f1;
+  color: white;
+}
+
+.btn-close-docs:hover {
+  background: #4f46e5;
+}
