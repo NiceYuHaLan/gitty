@@ -17,13 +17,12 @@ class CustomOAuth2UserService(
     override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
         val oauth2User = super.loadUser(userRequest)
 
-        val githubId = oauth2User.getAttribute<Int>("id")?.toString()
+        val githubId = oauth2User.getAttribute<Int>("id")?.toLong()
         val githubLogin = oauth2User.getAttribute<String>("login")
         val githubEmail = oauth2User.getAttribute<String>("email")
-        val githubAvatar = oauth2User.getAttribute<String>("avatar_url")
 
-        var user: User? = githubId?.let {
-            userRepository.findByGithubId(it).orElse(null)
+        var user = githubId?.let {
+            userRepository.findByGitHubId(it).orElse(null)
         }
 
         if (user == null) {
@@ -32,14 +31,13 @@ class CustomOAuth2UserService(
             }
         }
 
-        if (user == null) {
+        if (user == null && githubLogin != null && githubId != null) {
             user = User(
-                username = githubLogin!!,
-                password = null,
+                gitHubId = githubId,
+                username = githubLogin,
                 email = githubEmail,
-                githubId = githubId,
-                githubAvatar = githubAvatar,
-                provider = "github"
+                password = null,
+                gitHubAccessToken = userRequest.accessToken.tokenValue
             )
             user = userRepository.save(user)
         }

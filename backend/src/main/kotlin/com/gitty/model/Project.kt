@@ -4,13 +4,15 @@ import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
+@Table(name = "project")
 data class Project(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
     val name: String,
-    val imageUrl: String,
+
+    @Column(columnDefinition = "TEXT")
     val description: String? = null,
 
     @Column(name = "repo_url")

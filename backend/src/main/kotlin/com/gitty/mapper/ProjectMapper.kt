@@ -13,7 +13,6 @@ class ProjectMapper {
     fun toDto(project: Project): ProjectDto = ProjectDto(
         id = project.id!!,
         name = project.name,
-        imageUrl = project.imageUrl,
         description = project.description,
         userId = project.userId,
         repoUrl = project.repoUrl,
@@ -23,7 +22,6 @@ class ProjectMapper {
 
     fun toEntity(request: CreateProjectRequest, userId: Long): Project = Project(
         name = request.name,
-        imageUrl = request.imageUrl,
         description = request.description,
         repoUrl = request.repoUrl,
         documentation = null,
@@ -33,7 +31,6 @@ class ProjectMapper {
     fun updateEntity(existing: Project, request: UpdateProjectRequest): Project =
         existing.copy(
             name = request.name ?: existing.name,
-            imageUrl = request.imageUrl ?: existing.imageUrl,
             description = request.description ?: existing.description,
             repoUrl = request.repoUrl ?: existing.repoUrl,
             documentation = request.documentation ?: existing.documentation

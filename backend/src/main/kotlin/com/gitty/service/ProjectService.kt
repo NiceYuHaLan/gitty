@@ -54,16 +54,11 @@ class ProjectService(
         return true
     }
 
-    fun getUserIdByUsername(username: String): Long {
-        return projectRepository.findAll().firstOrNull()?.userId ?: 1L
-    }
-
-    private fun generateMockDocumentation(projectId: Long) {
+    internal fun generateMockDocumentation(projectId: Long) {
         val project = projectRepository.findById(projectId).orElseThrow()
 
         val mockDocs = """
-           TEST DOCS
-        """.trimIndent()
+          TEST DOCUMENTATION"""
 
         projectRepository.save(project.copy(documentation = mockDocs))
     }

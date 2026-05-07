@@ -14,14 +14,12 @@ export function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Состояния для модалок
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
-  // <-- НОВОЕ: Состояние для окна документации
   const [isDocsOpen, setIsDocsOpen] = useState(false);
   const [docsProject, setDocsProject] = useState<Project | null>(null);
 
@@ -54,7 +52,6 @@ export function Dashboard() {
     setIsModalOpen(true);
   };
 
-  // <-- НОВОЕ: Обработчик клика по кнопке "Документация"
   const handleDocsClick = (project: Project) => {
     setDocsProject(project);
     setIsDocsOpen(true);
@@ -86,21 +83,21 @@ export function Dashboard() {
   };
 
   const handleSubmitProject = async (data: CreateProjectRequest) => {
-  try {
-    if (isEditMode && selectedProject) {
-      await projectsApi.update(selectedProject.id, data);
-      toast.success('Проект успешно обновлён');
-    } else {
-      await projectsApi.create(data);
-      toast.success('Проект успешно создан');
+    try {
+      if (isEditMode && selectedProject) {
+        await projectsApi.update(selectedProject.id, data);
+        toast.success('Проект успешно обновлён');
+      } else {
+        await projectsApi.create(data);
+        toast.success('Проект успешно создан');
+      }
+      handleCloseModal();
+      await loadProjects();
+    } catch (error) {
+      console.error('Ошибка сохранения проекта:', error);
+      toast.error('Не удалось сохранить проект');
     }
-    handleCloseModal();
-    await loadProjects();
-  } catch (error) {
-    console.error('Ошибка сохранения проекта:', error);
-    toast.error('Не удалось сохранить проект');
-  }
-};
+  };
 
   if (loading) {
     return (
@@ -124,7 +121,7 @@ export function Dashboard() {
               key={project.id}
               project={project}
               onClick={handleProjectClick}
-              onDocsClick={handleDocsClick} // <-- Передаем обработчик
+              onDocsClick={handleDocsClick}
             />
           ))}
           
@@ -137,7 +134,6 @@ export function Dashboard() {
         </div>
       </main>
 
-      {}
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -148,7 +144,6 @@ export function Dashboard() {
             initialData={selectedProject ? {
               name: selectedProject.name,
               description: selectedProject.description,
-              imageUrl: selectedProject.imageUrl,
               repoUrl: selectedProject.repoUrl,
             } : undefined}
             onSubmit={handleSubmitProject}
@@ -157,9 +152,19 @@ export function Dashboard() {
           />
         ) : selectedProject ? (
           <div className="project-details">
-             <div className="details-image"><img src={selectedProject.imageUrl} alt={selectedProject.name} /></div>
              <div className="details-info">
-               <p>{selectedProject.description || "Нет описания"}</p>
+               <h3>{selectedProject.name}</h3>
+               {selectedProject.repoUrl && (
+                 <div className="details-repo">
+                   <a href={selectedProject.repoUrl} target="_blank" rel="noopener noreferrer">
+                     {selectedProject.repoUrl}
+                   </a>
+                 </div>
+               )}
+               <div className="details-description">
+                 <h4>Описание</h4>
+                 <p>{selectedProject.description || "Нет описания"}</p>
+               </div>
                <div className="details-actions">
                  <button className="btn-edit" onClick={handleEditClick}>Редактировать</button>
                  <button className="btn-delete" onClick={handleDeleteClick}>Удалить</button>
@@ -171,7 +176,6 @@ export function Dashboard() {
         )}
       </Modal>
 
-      {}
       <DocsViewer 
         project={docsProject} 
         isOpen={isDocsOpen} 

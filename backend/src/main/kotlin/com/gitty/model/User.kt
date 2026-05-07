@@ -9,25 +9,16 @@ data class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
+    @Column(unique = true, nullable = true)
+    val gitHubId: Long? = null,
+
     @Column(unique = true, nullable = false)
     val username: String,
 
-    @Column(nullable = true)
-    val password: String? = null,
-
     val email: String? = null,
 
-    @Column(name = "github_id")
-    val githubId: String? = null,
+    val password: String? = null,
 
-    @Column(name = "github_avatar")
-    val githubAvatar: String? = null,
-
-    @Column(name = "github_access_token")
-    val githubAccessToken: String? = null,
-
-    @Column(name = "provider")
-    val provider: String? = null,
-
-    val createdAt: java.time.LocalDateTime = java.time.LocalDateTime.now()
+    @Column(name = "git_hub_access_token")
+    val gitHubAccessToken: String? = null
 )

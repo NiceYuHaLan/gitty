@@ -17,9 +17,7 @@ class UserController(
         val id: Long,
         val username: String,
         val email: String?,
-        val githubId: String?,
-        val githubAvatar: String?,
-        val provider: String?,
+        val gitHubId: Long?,
         val token: String? = null
     )
 
@@ -62,8 +60,6 @@ class UserController(
         )
 
         val saved = userService.update(user.id!!, updatedUser)
-
-        // Генерируем НОВЫЙ токен с новым username
         val newToken = jwtUtil.generateToken(saved.username)
 
         return ResponseEntity.ok(saved.toResponseWithToken(newToken))
@@ -74,9 +70,7 @@ class UserController(
             id = id!!,
             username = username,
             email = email,
-            githubId = githubId,
-            githubAvatar = githubAvatar,
-            provider = provider
+            gitHubId = gitHubId
         )
     }
 
@@ -85,9 +79,7 @@ class UserController(
             id = id!!,
             username = username,
             email = email,
-            githubId = githubId,
-            githubAvatar = githubAvatar,
-            provider = provider,
+            gitHubId = gitHubId,
             token = token
         )
     }
