@@ -1,9 +1,9 @@
 plugins {
-	kotlin("jvm") version "1.9.21"
-	kotlin("plugin.spring") version "1.9.0"
-	kotlin("plugin.jpa") version "1.9.0"
-	id("org.springframework.boot") version "3.2.5"
-	id("io.spring.dependency-management") version "1.1.7"
+	alias(libs.plugins.kotlin.jvm)
+	alias(libs.plugins.kotlin.spring)
+	alias(libs.plugins.kotlin.jpa)
+	alias(libs.plugins.spring.boot)
+	alias(libs.plugins.spring.dependency.management)
 }
 
 group = "com.gitty"
@@ -26,26 +26,31 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation(libs.spring.boot.starter.data.jpa)
+	implementation(libs.spring.boot.starter.web)
+	implementation(libs.jackson.module.kotlin)
+	implementation(libs.kotlin.reflect)
+	implementation(libs.spring.boot.starter.security)
+	implementation(libs.jjwt.api)
+	implementation(libs.spring.boot.starter.oauth2.client)
+	implementation(libs.dotenv)
+	implementation(libs.spring.boot.starter.actuator)
+	implementation(libs.micrometer.registry.prometheus)
+
+	runtimeOnly(libs.postgresql)
+	runtimeOnly(libs.jjwt.impl)
+	runtimeOnly(libs.jjwt.jackson)
+
+	testImplementation(libs.spring.boot.starter.test)
+	testImplementation(libs.kotlin.test.junit5)
+
+	// implementation("org.springframework.boot:spring-boot-starter-amqp")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+	implementation("io.github.openfeign:feign-jackson")
 
-
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	implementation("io.jsonwebtoken:jjwt-api:0.12.3")
-
-	runtimeOnly("org.postgresql:postgresql")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.3")
-
-	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-	implementation("io.github.cdimascio:dotenv-java:3.0.0")
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 kotlin {
@@ -58,4 +63,10 @@ allOpen {
 	annotation("jakarta.persistence.Entity")
 	annotation("jakarta.persistence.MappedSuperclass")
 	annotation("jakarta.persistence.Embeddable")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.1")
+	}
 }

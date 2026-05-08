@@ -3,8 +3,12 @@ package com.gitty
 import io.github.cdimascio.dotenv.Dotenv
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.cloud.openfeign.EnableFeignClients
+import org.springframework.scheduling.annotation.EnableAsync
 
 @SpringBootApplication
+@EnableAsync
+@EnableFeignClients
 class DemoApplication
 
 fun main(args: Array<String>) {

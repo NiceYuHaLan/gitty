@@ -5,7 +5,9 @@ const BACKEND_URL = import.meta.env.VITE_API_URL;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -13,14 +15,14 @@ const getAuthHeaders = () => {
 };
 
 export const getImageUrl = (imageUrl: string): string => {
-  if (imageUrl.startsWith('http')) return imageUrl;
+  if (imageUrl?.startsWith('http')) return imageUrl;
   return `${BACKEND_URL}${imageUrl}`;
 };
 
 export interface Project {
   id: number;
   name: string;
-  imageUrl: string;
+  imageUrl?: string;
   description: string | null;
   userId: number;
   repoUrl?: string;
@@ -31,8 +33,8 @@ export interface Project {
 export interface CreateProjectRequest {
   name: string;
   description?: string;
-  image?: File;
   repoUrl?: string;
+  // image убрали
 }
 
 export const projectsApi = {
@@ -40,7 +42,7 @@ export const projectsApi = {
     const response = await axios.get<Project[]>(API_URL, getAuthHeaders());
     return response.data.map(project => ({
       ...project,
-      imageUrl: getImageUrl(project.imageUrl)
+      imageUrl: project.imageUrl ? getImageUrl(project.imageUrl) : undefined,
     }));
   },
 
@@ -49,58 +51,39 @@ export const projectsApi = {
     const project = response.data;
     return {
       ...project,
-      imageUrl: getImageUrl(project.imageUrl)
+      imageUrl: project.imageUrl ? getImageUrl(project.imageUrl) : undefined,
     };
   },
 
   create: async (request: CreateProjectRequest): Promise<Project> => {
-    const formData = new FormData();
-    formData.append('name', request.name);
-    if (request.description) formData.append('description', request.description);
-    if (request.repoUrl) formData.append('repoUrl', request.repoUrl);
-    if (request.image) formData.append('image', request.image);
-
-    const token = localStorage.getItem('token');
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await axios.post<Project>(API_URL, formData, { headers });
+    // Отправляем JSON, а не FormData
+    const response = await axios.post<Project>(API_URL, request, getAuthHeaders());
     const project = response.data;
     return {
       ...project,
-      imageUrl: getImageUrl(project.imageUrl)
+      imageUrl: project.imageUrl ? getImageUrl(project.imageUrl) : undefined,
     };
   },
 
   update: async (id: number, request: Partial<CreateProjectRequest>): Promise<Project> => {
-    const formData = new FormData();
-    if (request.name) formData.append('name', request.name);
-    if (request.description !== undefined) formData.append('description', request.description || '');
-    if (request.repoUrl !== undefined) formData.append('repoUrl', request.repoUrl || '');
-    if (request.image) formData.append('image', request.image);
-
-    const token = localStorage.getItem('token');
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await axios.put<Project>(`${API_URL}/${id}`, formData, { headers });
+    const response = await axios.put<Project>(`${API_URL}/${id}`, request, getAuthHeaders());
     const project = response.data;
     return {
       ...project,
-      imageUrl: getImageUrl(project.imageUrl)
+      imageUrl: project.imageUrl ? getImageUrl(project.imageUrl) : undefined,
     };
   },
 
+    syncCommits: async (projectId: number): Promise<{ synced: number }> => {
+      const response = await axios.post<{ synced: number }>(
+        `${API_URL}/${projectId}/sync`,
+        {},
+        getAuthHeaders()
+      );
+      return response.data;
+    },
+
   delete: async (id: number): Promise<void> => {
-    const token = localStorage.getItem('token');
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-    await axios.delete(`${API_URL}/${id}`, { headers });
-  }
+    await axios.delete(`${API_URL}/${id}`, getAuthHeaders());
+  },
 };

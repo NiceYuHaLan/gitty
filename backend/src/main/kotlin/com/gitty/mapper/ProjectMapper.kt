@@ -18,7 +18,7 @@ class ProjectMapper {
         userId = project.userId,
         repoUrl = project.repoUrl,
         documentation = project.documentation,
-        createdAt = project.createdAt?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        createdAt = project.createdAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     )
 
     fun toEntity(request: CreateProjectRequest, userId: Long): Project = Project(
@@ -30,12 +30,16 @@ class ProjectMapper {
         userId = userId
     )
 
-    fun updateEntity(existing: Project, request: UpdateProjectRequest): Project =
-        existing.copy(
+    fun updateEntity(existing: Project, request: UpdateProjectRequest): Project {
+        return Project(
+            id = existing.id,
             name = request.name ?: existing.name,
             imageUrl = request.imageUrl ?: existing.imageUrl,
             description = request.description ?: existing.description,
             repoUrl = request.repoUrl ?: existing.repoUrl,
-            documentation = request.documentation ?: existing.documentation
+            documentation = request.documentation ?: existing.documentation,
+            userId = existing.userId,
+            createdAt = existing.createdAt
         )
+    }
 }

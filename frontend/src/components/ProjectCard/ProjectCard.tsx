@@ -1,5 +1,6 @@
 import './ProjectCard.css';
 import type { Project } from '../../api/projectsApi';
+import { CommitList } from '../CommitList/CommitList';
 
 interface ProjectCardProps {
   project: Project;
@@ -30,6 +31,14 @@ export function ProjectCard({ project, onClick, onDocsClick }: ProjectCardProps)
           Документация
         </button>
       </div>
+
+          <details onClick={(e) => e.stopPropagation()}>
+            <summary>📦 Коммиты и анализ</summary>
+            <div className="card-commits">
+              <CommitList projectId={project.id} />
+            </div>
+          </details>
+
     </div>
   );
 }

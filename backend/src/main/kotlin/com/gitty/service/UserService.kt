@@ -21,6 +21,12 @@ class UserService(
         return repository.save(user)
     }
 
+    fun findByEmail(email: String): User? {
+        return repository.findByEmail(email).orElse(null)
+    }
+
+    fun findById(id: Long): User? = repository.findById(id).orElse(null)
+
     fun findByUsername(username: String): User? {
         return repository.findByUsername(username).orElse(null)
     }

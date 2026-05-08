@@ -1,0 +1,22 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: gitty
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+immers:
+  api:
+    url: "https://chat.immers.cloud/v1/endpoints/gpt-oss-20b/generate/chat/completions"
+    token: "WEVTmoW-GZETzQMxqNSoUu1NvdP4-iX9"

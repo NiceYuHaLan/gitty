@@ -3,128 +3,83 @@ package com.gitty.controller
 import com.gitty.dto.CreateProjectRequest
 import com.gitty.dto.ProjectDto
 import com.gitty.dto.UpdateProjectRequest
-import com.gitty.security.JwtUtil
+import com.gitty.service.CommitService
 import com.gitty.service.ProjectService
+import com.gitty.service.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
-import java.nio.file.*
-import java.util.UUID
 
 @RestController
 @RequestMapping("/api/projects")
-@CrossOrigin(origins = ["http://localhost:5173"])
 class ProjectController(
-    private val service: ProjectService,
-    private val jwtUtil: JwtUtil
+    private val projectService: ProjectService,
+    private val userService: UserService,
+    private val commitService: CommitService
 ) {
 
-    private val uploadDir = System.getProperty("user.dir") + "/uploads"
-
-    init {
-        Files.createDirectories(Paths.get(uploadDir))
-    }
-
-    private fun getUserIdFromToken(authHeader: String?): Long {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw RuntimeException("Unauthorized")
-        }
-        val token = authHeader.replace("Bearer ", "")
-        val username = jwtUtil.getUsernameFromToken(token)
-        return service.getUserIdByUsername(username)
-    }
-
     @GetMapping
-    fun getAll(@RequestHeader("Authorization") authHeader: String): ResponseEntity<List<ProjectDto>> {
-        val userId = getUserIdFromToken(authHeader)
-        return ResponseEntity.ok(service.getAllByUserId(userId))
-    }
-
-    @GetMapping("/{id}")
-    fun getById(@PathVariable id: Long, @RequestHeader("Authorization") authHeader: String): ResponseEntity<ProjectDto> {
-        val userId = getUserIdFromToken(authHeader)
-        val project = service.getById(id, userId)
-        return if (project != null) {
-            ResponseEntity.ok(project)
-        } else {
-            ResponseEntity.notFound().build()
-        }
+    fun getUserProjects(authentication: Authentication): ResponseEntity<List<ProjectDto>> {
+        val userId = getUserIdFromAuth(authentication) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        return ResponseEntity.ok(projectService.getAllByUserId(userId))
     }
 
     @PostMapping
-    fun create(
-        @RequestParam name: String,
-        @RequestParam(required = false) description: String?,
-        @RequestParam(required = false) repoUrl: String?,
-        @RequestParam(required = false) image: MultipartFile?,
-        @RequestHeader("Authorization") authHeader: String
+    fun createProject(
+        @RequestBody request: CreateProjectRequest,
+        authentication: Authentication
     ): ResponseEntity<ProjectDto> {
-        val userId = getUserIdFromToken(authHeader)
-        val imageUrl = image?.let { saveImage(it) } ?: "https://via.placeholder.com/300x150"
-        val request = CreateProjectRequest(name, imageUrl, description, repoUrl)
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(service.create(request, userId))
+        val userId = getUserIdFromAuth(authentication) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val created = projectService.create(request, userId)
+        return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
     @PutMapping("/{id}")
-    fun update(
+    fun updateProject(
         @PathVariable id: Long,
-        @RequestParam(required = false) name: String?,
-        @RequestParam(required = false) description: String?,
-        @RequestParam(required = false) repoUrl: String?,
-        @RequestParam(required = false) image: MultipartFile?,
-        @RequestHeader("Authorization") authHeader: String
+        @RequestBody request: UpdateProjectRequest,
+        authentication: Authentication
     ): ResponseEntity<ProjectDto> {
-        val userId = getUserIdFromToken(authHeader)
-        val imageUrl = image?.let { saveImage(it) }
-        val request = UpdateProjectRequest(name, imageUrl, description, repoUrl)
-        val updated = service.update(id, request, userId)
-        return if (updated != null) {
-            ResponseEntity.ok(updated)
-        } else {
-            ResponseEntity.notFound().build()
-        }
+        val userId = getUserIdFromAuth(authentication) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val updated = projectService.update(id, request, userId)
+        return if (updated != null) ResponseEntity.ok(updated)
+        else ResponseEntity.status(HttpStatus.FORBIDDEN).build()
     }
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: Long, @RequestHeader("Authorization") authHeader: String): ResponseEntity<Void> {
-        val userId = getUserIdFromToken(authHeader)
-        val deleted = service.delete(id, userId)
-        return if (deleted) {
-            ResponseEntity.noContent().build()
-        } else {
-            ResponseEntity.notFound().build()
-        }
-    }
-
-    @GetMapping("/images/{filename}")
-    fun getImage(@PathVariable filename: String): ResponseEntity<ByteArray> {
-        val path = Paths.get(uploadDir, filename)
-        return if (Files.exists(path)) {
-            val contentType = Files.probeContentType(path) ?: "image/jpeg"
-            ResponseEntity.ok()
-                .header("Content-Type", contentType)
-                .body(Files.readAllBytes(path))
-        } else {
-            ResponseEntity.notFound().build()
-        }
-    }
-
-    private fun saveImage(file: MultipartFile): String {
-        val filename = "${UUID.randomUUID()}_${file.originalFilename}"
-        val path = Paths.get(uploadDir, filename)
-        Files.copy(file.inputStream, path, StandardCopyOption.REPLACE_EXISTING)
-        return "/api/projects/images/$filename"
-    }
-
-    @GetMapping("/{id}/documentation")
-    fun getDocumentation(
+    fun deleteProject(
         @PathVariable id: Long,
-        @RequestHeader("Authorization") authHeader: String
-    ): ResponseEntity<String> {
-        val userId = getUserIdFromToken(authHeader)
-        val project = service.getById(id, userId)
-        return ResponseEntity.ok(project?.documentation ?: "Документация еще не сгенерирована.")
+        authentication: Authentication
+    ): ResponseEntity<Void> {
+        val userId = getUserIdFromAuth(authentication) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        return if (projectService.delete(id, userId)) ResponseEntity.noContent().build()
+        else ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+    }
+
+    @PostMapping("/{id}/sync")
+    fun syncCommits(
+        @PathVariable id: Long,
+        authentication: Authentication
+    ): ResponseEntity<Map<String, Any>> {
+        val userId = getUserIdFromAuth(authentication)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val project = projectService.getById(id, userId)
+            ?: return ResponseEntity.notFound().build()
+        val user = userService.findByUsername(authentication.name)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val token = user.githubAccessToken
+        if (token.isNullOrBlank()) {
+            return ResponseEntity.badRequest().body(mapOf("error" to "GitHub token not configured"))
+        }
+
+        val syncedCount = commitService.syncCommits(id, token)
+        return ResponseEntity.ok(mapOf("synced" to syncedCount))
+    }
+
+    private fun getUserIdFromAuth(authentication: Authentication): Long? {
+        val username = authentication.name
+        val user = userService.findByUsername(username) ?: return null
+        return user.id
     }
 }

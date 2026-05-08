@@ -65,6 +65,7 @@ class ProjectService(
            TEST DOCS
         """.trimIndent()
 
-        projectRepository.save(project.copy(documentation = mockDocs))
+        project.documentation = mockDocs
+        projectRepository.save(project)
     }
 }

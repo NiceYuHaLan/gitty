@@ -4,30 +4,30 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "app_user")
-data class User(
+class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    var id: Long? = null,
 
     @Column(unique = true, nullable = false)
-    val username: String,
+    var username: String,
 
     @Column(nullable = true)
-    val password: String? = null,
+    var password: String? = null,
 
-    val email: String? = null,
+    var email: String? = null,
 
     @Column(name = "github_id")
-    val githubId: String? = null,
+    var githubId: String? = null,
 
     @Column(name = "github_avatar")
-    val githubAvatar: String? = null,
+    var githubAvatar: String? = null,
 
     @Column(name = "github_access_token")
-    val githubAccessToken: String? = null,
+    var githubAccessToken: String? = null,
 
     @Column(name = "provider")
-    val provider: String? = null,
+    var provider: String? = null,
 
-    val createdAt: java.time.LocalDateTime = java.time.LocalDateTime.now()
+    var createdAt: java.time.LocalDateTime = java.time.LocalDateTime.now()
 )

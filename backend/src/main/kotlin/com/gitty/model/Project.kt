@@ -4,23 +4,26 @@ import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
-data class Project(
+class Project(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    var id: Long? = null,
 
-    val name: String,
-    val imageUrl: String,
-    val description: String? = null,
+    var name: String,
+    var imageUrl: String? = null,
+    var description: String? = null,
 
     @Column(name = "repo_url")
-    val repoUrl: String? = null,
+    var repoUrl: String? = null,
+
+    @Column(name = "repo_full_name")
+    var repoFullName: String? = null,
 
     @Column(columnDefinition = "TEXT")
-    val documentation: String? = null,
+    var documentation: String? = null,
 
     @Column(name = "user_id", nullable = false)
-    val userId: Long,
+    var userId: Long,
 
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    var createdAt: LocalDateTime = LocalDateTime.now()
 )

@@ -56,14 +56,20 @@ class UserController(
             }
         }
 
-        val updatedUser = user.copy(
+        val updatedUser = User(
+            id = user.id,
             username = request.username ?: user.username,
-            email = request.email ?: user.email
+            email = request.email ?: user.email,
+            password = user.password,
+            githubId = user.githubId,
+            githubAvatar = user.githubAvatar,
+            githubAccessToken = user.githubAccessToken,
+            provider = user.provider,
+            createdAt = user.createdAt
         )
 
         val saved = userService.update(user.id!!, updatedUser)
 
-        // Генерируем НОВЫЙ токен с новым username
         val newToken = jwtUtil.generateToken(saved.username)
 
         return ResponseEntity.ok(saved.toResponseWithToken(newToken))
